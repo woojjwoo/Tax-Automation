@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | RestoTax</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+<div class="dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Resto<span>Tax</span></div>
+    <nav class="sidebar-nav">
+      <a href="/dashboard" class="active"><span class="icon">&#127968;</span> <span>Dashboard</span></a>
+      <a href="/dashboard/sync"><span class="icon">&#128260;</span> <span>Sync Status</span></a>
+      <a href="/dashboard/receipts"><span class="icon">&#128451;</span> <span>Receipts</span></a>
+      <a href="/dashboard/filings"><span class="icon">&#128196;</span> <span>Tax Filings</span></a>
+      <a href="/dashboard/delivery"><span class="icon">&#128666;</span> <span>Delivery</span></a>
+      <a href="/dashboard/tips"><span class="icon">&#128181;</span> <span>Tip Attribution</span></a>
+      <a href="/dashboard/settings"><span class="icon">&#9881;</span> <span>Settings</span></a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar">{{ client.initials }}</div>
+      <div class="info">
+        <div class="name">{{ client.name }}</div>
+        <div class="role">{{ client.plan }} Plan</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <div class="main-header">
+      <h1>Dashboard</h1>
+      <div class="date">{{ today }}</div>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="label">Sync Health</div>
+        <div class="value">{{ kpi.sync_health }}</div>
+        <div class="change {{ 'up' if kpi.sync_streak > 0 else 'down' }}">{{ kpi.sync_streak }}-day streak</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Missing Receipts</div>
+        <div class="value">{{ kpi.missing_receipts }}</div>
+        <div class="change {{ 'up' if kpi.receipt_trend == 'down' else 'down' }}">{{ kpi.receipt_change }} vs last month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">SRM Variance</div>
+        <div class="value">{{ kpi.srm_variance }}</div>
+        <div class="change up">Within tolerance</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Next Filing</div>
+        <div class="value">{{ kpi.next_filing_type }}</div>
+        <div class="change">Due {{ kpi.next_filing_date }}</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <!-- RECENT ALERTS -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Recent Alerts</h2>
+          <a href="#" style="color:var(--primary);font-size:0.85rem;font-weight:600;">View All</a>
+        </div>
+        <div class="panel-body">
+          {% for alert in alerts %}
+          <div class="alert-item">
+            <div class="alert-dot {{ alert.level }}"></div>
+            <div class="alert-content">
+              <div class="title">{{ alert.title }}</div>
+              <div class="time">{{ alert.time }}</div>
+            </div>
+          </div>
+          {% endfor %}
+          {% if not alerts %}
+          <p style="color:var(--text-light);text-align:center;padding:20px 0;">No recent alerts. Everything looks good!</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- INTEGRATION STATUS -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Integration Status</h2>
+        </div>
+        <div class="panel-body">
+          <table>
+            <thead>
+              <tr><th>Service</th><th>Status</th><th>Last Sync</th></tr>
+            </thead>
+            <tbody>
+              {% for svc in integrations %}
+              <tr>
+                <td>{{ svc.name }}</td>
+                <td><span class="badge badge-{{ svc.badge }}">{{ svc.status }}</span></td>
+                <td>{{ svc.last_sync }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPCOMING DEADLINES -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Upcoming Deadlines</h2>
+      </div>
+      <div class="panel-body">
+        <table>
+          <thead>
+            <tr><th>Filing</th><th>Period</th><th>Due Date</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for d in deadlines %}
+            <tr>
+              <td>{{ d.name }}</td>
+              <td>{{ d.period }}</td>
+              <td>{{ d.due }}</td>
+              <td><span class="badge badge-{{ d.badge }}">{{ d.status }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MONTHLY RECONCILIATION SUMMARY -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Monthly Reconciliation</h2>
+        <span class="badge badge-info">{{ recon.month }}</span>
+      </div>
+      <div class="panel-body">
+        <table>
+          <thead>
+            <tr><th>Check</th><th>Result</th><th>Details</th></tr>
+          </thead>
+          <tbody>
+            {% for r in recon.checks %}
+            <tr>
+              <td>{{ r.name }}</td>
+              <td><span class="badge badge-{{ r.badge }}">{{ r.result }}</span></td>
+              <td>{{ r.details }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// Auto-refresh every 5 minutes
+setTimeout(() => location.reload(), 300000);
+</script>
+</body>
+</html>
