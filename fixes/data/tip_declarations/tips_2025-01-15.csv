@@ -1,0 +1,2 @@
+date,timestamp,employee_id,employee_name,position,shift_sales,cc_tips,cash_tips,total_tips,tip_rate,minimum_required,status
+2025-01-15,2026-03-23T17:38:56.822955,E004,Server A,Server,450.00,72.00,55.00,127.00,0.2822,36.00,OK

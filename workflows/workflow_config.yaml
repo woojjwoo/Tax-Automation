@@ -265,3 +265,102 @@ alerts:
     - event: "tip_attribution_triggered"
       severity: "info"
       notify: ["bookkeeper", "cpa"]
+
+    # --- BLOCKER FIX: Additional alerts ---
+    - event: "qbo_sync_failure"
+      description: "Lightspeed → QBO daily sync missing (Blocker 3)"
+      check_script: "fixes/scripts/sync_health_check.py --check-range 1"
+      schedule: "daily_08:00"
+      severity: "critical"
+      notify: ["bookkeeper", "cpa"]
+
+    - event: "missing_receipts_detected"
+      description: "Bank transactions without Dext match (Blocker 2)"
+      check_script: "fixes/scripts/missing_receipt_detector.py --demo"
+      schedule: "weekly_monday_09:00"
+      severity: "warning"
+      notify: ["bookkeeper", "owner"]
+
+    - event: "bank_feed_disconnected"
+      description: "QBO bank feed inactive > 3 days (Blocker 9)"
+      schedule: "daily_08:00"
+      severity: "warning"
+      notify: ["bookkeeper"]
+
+    - event: "srm_certificate_expiry"
+      description: "SRM/MEV certificate approaching expiry (Blocker 6)"
+      days_before: [90, 60, 30, 14]
+      severity: "critical"
+      notify: ["owner", "cpa"]
+
+    - event: "payroll_rate_annual_review"
+      description: "Annual payroll rate verification required (Blocker 7)"
+      schedule: "annual_january_02"
+      check_script: "fixes/scripts/payroll_rate_validator.py --year CURRENT"
+      severity: "critical"
+      notify: ["bookkeeper", "cpa"]
+
+    - event: "delivery_platform_reconciliation_due"
+      description: "Weekly delivery platform payout reconciliation (Blocker 4)"
+      schedule: "weekly_wednesday_09:00"
+      check_script: "fixes/scripts/delivery_platform_reconciler.py --demo"
+      severity: "info"
+      notify: ["bookkeeper"]
+
+# --- BLOCKER FIX: Automated Checks ---
+blocker_fixes:
+  tip_declaration:
+    description: "Digital cash tip declaration replacing paper forms (Blocker 1)"
+    script: "fixes/scripts/tip_declaration_system.py"
+    integration: "POS clock-out prompt → script → payroll export"
+    sop: null
+
+  missing_receipts:
+    description: "Detect bank transactions without matching Dext receipts (Blocker 2)"
+    script: "fixes/scripts/missing_receipt_detector.py"
+    integration: "Weekly cron → compare bank CSV to Dext → alert on gaps"
+    sop: null
+
+  sync_health:
+    description: "Daily Lightspeed → QBO sync verification (Blocker 3)"
+    script: "fixes/scripts/sync_health_check.py"
+    integration: "Daily 8 AM cron → compare SRM totals to QBO postings"
+    sop: null
+
+  delivery_reconciliation:
+    description: "Uber Eats / DoorDash / Skip payout reconciliation (Blocker 4)"
+    script: "fixes/scripts/delivery_platform_reconciler.py"
+    integration: "Weekly → download platform reports → reconcile → journal entry"
+    sop: null
+
+  owner_roi:
+    description: "One-page ROI summary for owner buy-in (Blocker 5)"
+    template: "fixes/templates/owner_roi_summary.md"
+    integration: "Present during onboarding"
+    sop: null
+
+  srm_emergency:
+    description: "SRM hardware failure procedures (Blocker 6)"
+    sop: "fixes/sops/srm_emergency_procedures.md"
+    integration: "Post near POS station"
+
+  payroll_rates:
+    description: "Annual payroll rate validation (Blocker 7)"
+    script: "fixes/scripts/payroll_rate_validator.py"
+    integration: "Run January 2 annually"
+    sop: null
+
+  bookkeeper_sop:
+    description: "Monthly close SOP for turnover resilience (Blocker 8)"
+    sop: "fixes/sops/bookkeeper_monthly_sop.md"
+    integration: "Train new bookkeepers; print monthly calendar"
+
+  bank_feeds:
+    description: "Bank feed reconnection guide (Blocker 9)"
+    sop: "fixes/sops/bank_feed_reconnection_guide.md"
+    integration: "Reference when feeds disconnect"
+
+  language_config:
+    description: "Loi 101 French language configuration (Blocker 10)"
+    sop: "fixes/sops/loi_101_language_config.md"
+    integration: "Configure during onboarding"
