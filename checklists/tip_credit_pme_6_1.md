@@ -113,32 +113,37 @@ Credit = Total eligible employer contributions on declared/attributed tips
 
 ---
 
-## Practical Calculation Example — Giwa Restaurant
+## Practical Calculation Example — Giwa Restaurant ($30K/Month Revenue)
 
-**Assumptions (illustrative):**
+**Giwa's actual profile:**
 
 | Item | Amount |
 |------|--------|
-| Number of tipped employees | 15 |
-| Total declared tips (all employees, annual) | $285,000 |
-| Average tip per employee | $19,000 |
+| Monthly revenue | $30,000 |
+| Annual revenue | $360,000 |
+| Number of tipped employees | 3 (2 servers + 1 bartender) |
+| Total declared tips (all employees, annual) | $43,200 |
+| Average tip per employee | $14,400 |
+| Average tip rate (% of personal sales) | ~14.5% |
 
 **Estimated employer payroll contributions on tips:**
 
-| Contribution | Rate | Amount on $285,000 |
+| Contribution | Rate | Amount on $43,200 |
 |---|---|---|
-| QPP (employer) | ~6.40% | $18,240 |
-| EI (employer) | ~2.21% | $6,299 |
-| QPIP (employer) | ~0.692% | $1,972 |
-| HSF | ~1.65% | $4,703 |
-| CNESST | ~2.50% (illustrative) | $7,125 |
-| CNT | ~0.07% | $200 |
-| **Total eligible contributions** | | **$38,539** |
+| QPP (employer) | ~6.40% | $2,765 |
+| EI (employer) | ~2.21% | $955 |
+| QPIP (employer) | ~0.692% | $299 |
+| HSF | ~1.65% | $713 |
+| CNESST | ~2.50% (illustrative) | $1,080 |
+| CNT | ~0.07% | $30 |
+| **Total eligible contributions** | | **$5,842** |
 
-**Credit at 75%:** $38,539 × 75% = **$28,904**
+**Credit at 75%:** $5,842 × 75% = **$4,382**
 
-> This is a **$28,904 refundable credit** that directly reduces Giwa's Quebec tax
-> payable or results in a refund. This is material for a restaurant of this size.
+> This is a **$4,382 refundable credit** — Giwa receives this even in a loss year.
+> For a small restaurant near break-even, this is meaningful cash flow.
+> Combined with the ~$15,800 non-capital loss carry-forward, Giwa's tax position
+> is well-managed despite thin margins.
 
 ---
 

@@ -1,0 +1,21 @@
+date,vendor,invoice_number,description,category,gl_account,amount_before_tax,gst_amount,gst_number,qst_amount,qst_number,total_amount,payment_method,itc_eligible,itr_eligible,itc_restricted,dext_status
+2025-01-03,Sysco Canada,INV-20250103-001,Weekly food order - proteins,COGS-Food,5010,2450.00,122.50,123456789,244.39,1234567890,2816.89,Credit Card,Yes,Yes,No,Published
+2025-01-03,SAQ,SAQ-20250103,Wine and spirits order,COGS-Beverage,5020,800.00,40.00,121491807,79.80,1006476344,919.80,Credit Card,Yes,Yes,No,Published
+2025-01-06,Sysco Canada,INV-20250106-001,Weekly food order - produce/dairy,COGS-Food,5010,1850.00,92.50,123456789,184.54,1234567890,2127.04,Credit Card,Yes,Yes,No,Published
+2025-01-08,Lavo (cleaning supplies),INV-LAV-0108,Cleaning products and chemicals,Supplies,5200,185.00,9.25,123456789,18.45,1234567890,212.70,Credit Card,Yes,Yes,No,Published
+2025-01-10,Sysco Canada,INV-20250110-001,Weekly food order - proteins/produce,COGS-Food,5010,2200.00,110.00,123456789,219.45,1234567890,2529.45,Credit Card,Yes,Yes,No,Published
+2025-01-10,Pepsi Canada,INV-PEP-0110,Non-alcoholic beverages restock,COGS-Beverage Non-Alc,5025,150.00,7.50,123456789,14.96,1234567890,172.46,Credit Card,Yes,Yes,No,Published
+2025-01-13,Hydro-Quebec,HQ-JAN-2025,Electricity - December usage,Utilities,6200,520.00,26.00,N/A - Exempt,0.00,N/A - Exempt,546.00,Pre-authorized,No,No,No,Published
+2025-01-14,Énergir,ENG-JAN-2025,Natural gas - December usage,Utilities,6200,280.00,14.00,123456789,27.93,1234567890,321.93,Pre-authorized,Yes,Yes,No,Published
+2025-01-15,Landlord (Commercial Lease),RENT-JAN-2025,January rent - commercial lease,Rent,6100,3500.00,175.00,987654321,349.13,1987654321,4024.13,EFT,Yes,Yes,No,Published
+2025-01-17,Sysco Canada,INV-20250117-001,Weekly food order,COGS-Food,5010,2100.00,105.00,123456789,209.48,1234567890,2414.48,Credit Card,Yes,Yes,No,Published
+2025-01-18,Restaurant Supply Depot,RSD-0118,Replacement dishes and utensils,Smallwares,5210,320.00,16.00,123456789,31.92,1234567890,367.92,Credit Card,Yes,Yes,No,Published
+2025-01-20,Bell Canada,BELL-JAN-2025,Internet and phone service,Utilities,6200,125.00,6.25,123456789,12.47,1234567890,143.72,Pre-authorized,Yes,Yes,No,Published
+2025-01-22,Facebook/Meta,META-JAN-2025,Social media advertising,Marketing,6600,200.00,10.00,N/A - Foreign,0.00,N/A - Foreign,210.00,Credit Card,No,No,No,Published
+2025-01-24,Sysco Canada,INV-20250124-001,Weekly food order,COGS-Food,5010,2350.00,117.50,123456789,234.41,1234567890,2701.91,Credit Card,Yes,Yes,No,Published
+2025-01-24,SAQ,SAQ-20250124,Wine restock,COGS-Beverage,5020,650.00,32.50,121491807,64.84,1006476344,747.34,Credit Card,Yes,Yes,No,Published
+2025-01-27,Intact Insurance,INS-JAN-2025,Monthly commercial insurance premium,Insurance,6300,400.00,0.00,Exempt,0.00,Exempt,400.00,Pre-authorized,No,No,No,Published
+2025-01-28,CPA Firm LLP,CPA-JAN-2025,Monthly bookkeeping retainer,Professional Fees,6400,250.00,12.50,123456789,24.94,1234567890,287.44,EFT,Yes,Yes,No,Published
+2025-01-29,Restaurant client dinner,MEAL-0129,Business meal with supplier,Meals & Entertainment,6500,95.00,4.75,123456789,9.48,1234567890,109.23,Credit Card,Yes (50%),Yes (50%),Yes - 50%,Published
+2025-01-31,Sysco Canada,INV-20250131-001,Weekly food order,COGS-Food,5010,1800.00,90.00,123456789,179.55,1234567890,2069.55,Credit Card,Yes,Yes,No,Published
+2025-01-31,Lightspeed,LS-JAN-2025,POS subscription - January,Software,6710,150.00,7.50,123456789,14.96,1234567890,172.46,Credit Card,Yes,Yes,No,Published
