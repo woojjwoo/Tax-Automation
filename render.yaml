@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: restotax
+    runtime: python
+    buildCommand: pip install -r webapp/requirements.txt
+    startCommand: gunicorn webapp.app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.11.6"
+    plan: free
+    autoDeploy: false
