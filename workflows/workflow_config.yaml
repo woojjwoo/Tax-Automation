@@ -1,0 +1,267 @@
+# Giwa Restaurant — Automated Tax Compliance Workflow Configuration
+# This YAML defines the logical workflow for integration tooling (Zapier/Make)
+
+client:
+  name: "Giwa Restaurant Inc."
+  jurisdiction:
+    federal: "CRA"
+    provincial: "Revenu Québec"
+  industry: "Restaurant / Food Services"
+  naics_code: "7225"
+  gst_number: "XXXXXXXXX RT0001"  # Replace with actual
+  qst_number: "1XXXXXXXXX TQ0001"  # Replace with actual
+  fiscal_year_end: "YYYY-12-31"  # Adjust to actual FYE
+
+# --- Software Stack ---
+software:
+  cloud_accounting:
+    provider: "quickbooks_online_canada"
+    plan: "Plus"  # Minimum for class tracking (revenue categories)
+    features:
+      - multi_currency: false
+      - class_tracking: true  # Food vs. Beverage vs. Other
+      - location_tracking: false  # Single location
+      - gst_qst_tracking: true
+    tax_codes:
+      standard: "GQ"  # GST 5% + QST 9.975%
+      exempt: "E"
+      zero_rated: "Z"
+      non_taxable: "NT"
+
+  document_capture:
+    provider: "dext"
+    plan: "Business"
+    integrations:
+      - target: "quickbooks_online"
+        sync_mode: "automatic"
+        publish_as: "bill"  # or "expense" for credit card purchases
+    validation_rules:
+      - rule: "gst_number_required"
+        threshold: 150.00  # CAD - flag if missing above this amount
+        action: "hold_for_review"
+      - rule: "qst_number_required"
+        threshold: 150.00
+        action: "hold_for_review"
+      - rule: "meals_entertainment_50_percent"
+        vendor_categories: ["restaurant", "entertainment", "catering"]
+        itc_restriction: 0.50
+        itr_restriction: 0.50
+
+  payroll:
+    provider: "wagepoint"  # or "ceridian_powerpay"
+    features:
+      - quebec_payroll: true
+      - qpp_qpp2: true
+      - ei_premium: true
+      - qpip: true
+      - cnesst: true
+      - hsf: true
+      - cnt: true
+      - tip_tracking: true
+      - rl1_filing: true
+      - t4_filing: true
+    tip_attribution:
+      enabled: true
+      deemed_minimum_rate: 0.08  # 8% of personal sales
+      source: "srm_mev"
+      frequency: "per_pay_period"
+
+  pos_system:
+    provider: "lightspeed_restaurant"
+    srm_mev:
+      certified: true
+      certificate_number: "XXXXXXXXXX"  # Replace with actual
+      firmware_version: "current"  # Verify against RQ certified list
+    integration:
+      target: "quickbooks_online"
+      sync_frequency: "daily"
+      revenue_mapping:
+        food_sales: "4010"
+        beverage_alcohol: "4020"
+        beverage_non_alcohol: "4030"
+        other_revenue: "4090"
+      tax_mapping:
+        gst_collected: "2310"
+        qst_collected: "2320"
+
+  tax_filing:
+    provider: "taxcycle"
+    modules:
+      - "T2"        # Federal corporate return
+      - "CO-17"     # Quebec corporate return
+      - "GST/QST"   # Indirect tax returns
+      - "T4/RL-1"   # Employment slips
+    efile:
+      cra: true
+      revenu_quebec: true
+
+# --- Automated Workflows ---
+workflows:
+  daily_revenue_capture:
+    trigger: "pos_daily_close"
+    schedule: "daily_23:59"
+    steps:
+      - action: "sync_pos_to_accounting"
+        source: "lightspeed"
+        target: "quickbooks_online"
+        data: ["sales_summary", "tax_collected", "payment_methods"]
+      - action: "verify_srm_sync"
+        source: "srm_mev"
+        check: "transaction_count_matches_pos"
+      - action: "capture_tip_data"
+        source: "srm_mev"
+        target: "payroll_staging"
+        data: ["credit_card_tips", "declared_cash_tips"]
+
+  expense_capture:
+    trigger: "dext_document_received"
+    steps:
+      - action: "ocr_extract"
+        fields: ["vendor", "date", "amount", "gst_number", "qst_number", "line_items"]
+      - action: "validate_tax_numbers"
+        gst_validation: "cra_registry"
+        qst_validation: "rq_registry"
+      - action: "categorize_expense"
+        method: "dext_supplier_rules"
+      - action: "apply_itc_itr_restrictions"
+        rules: "meals_entertainment_50_percent"
+      - action: "publish_to_accounting"
+        target: "quickbooks_online"
+        approval_required_above: 5000.00
+
+  payroll_processing:
+    trigger: "pay_period_end"
+    frequency: "semi_monthly"  # 1st and 15th
+    steps:
+      - action: "import_hours"
+        source: "time_tracking"
+      - action: "import_tips"
+        source: "srm_mev"
+      - action: "calculate_tip_attribution"
+        rule: "deemed_8_percent"
+      - action: "calculate_deductions"
+        components:
+          - "federal_tax"
+          - "quebec_tax"
+          - "qpp"
+          - "qpp2"
+          - "ei"
+          - "qpip"
+      - action: "calculate_employer_premiums"
+        components:
+          - "qpp_employer"
+          - "qpp2_employer"
+          - "ei_employer"
+          - "qpip_employer"
+          - "hsf"
+          - "cnesst"
+          - "cnt"
+      - action: "process_payment"
+        method: "direct_deposit"
+      - action: "sync_payroll_journal"
+        target: "quickbooks_online"
+      - action: "accumulate_pme_6_1_data"
+        data: ["tip_income_per_employee", "employer_premiums_on_tips"]
+
+  monthly_reconciliation:
+    trigger: "month_end"
+    schedule: "monthly_day_5"
+    steps:
+      - action: "reconcile_bank_accounts"
+        target: "quickbooks_online"
+      - action: "reconcile_srm_to_gl"
+        compare: ["srm_gross_sales", "gl_revenue"]
+        variance_threshold: 0.005  # 0.5%
+      - action: "reconcile_gst_collected"
+        compare: ["srm_gst", "gl_gst_payable"]
+      - action: "reconcile_qst_collected"
+        compare: ["srm_qst", "gl_qst_payable"]
+      - action: "reconcile_itc_itr"
+        compare: ["dext_invoices", "gl_itc_itr"]
+      - action: "generate_variance_report"
+        recipients: ["bookkeeper", "cpa_preparer"]
+      - action: "lock_period"
+        approval_required: true
+
+  gst_qst_filing:
+    trigger: "filing_period_end"
+    frequency: "quarterly"  # or annual depending on revenue
+    steps:
+      - action: "export_trial_balance"
+        source: "quickbooks_online"
+        target: "taxcycle"
+      - action: "prepare_gst_return"
+        form: "RC7200"
+      - action: "prepare_qst_return"
+        form: "VDZ-471"
+      - action: "cross_reference_srm"
+        check: "return_totals_match_srm_annual"
+        variance_threshold: 500.00
+      - action: "partner_review"
+        required: true
+        reviewer: "senior_partner"
+      - action: "efile_gst"
+        target: "cra_netfile"
+      - action: "efile_qst"
+        target: "rq_clic_revenu"
+
+  year_end_filing:
+    trigger: "fiscal_year_end"
+    steps:
+      - action: "complete_monthly_closes"
+        verify: "all_12_months_closed"
+      - action: "post_adjusting_entries"
+        target: "quickbooks_online"
+      - action: "generate_gifi_trial_balance"
+        source: "quickbooks_online"
+        target: "taxcycle"
+      - action: "prepare_t4_rl1"
+        source: "payroll_system"
+        target: "taxcycle"
+      - action: "calculate_pme_6_1_credit"
+        form: "CO-1029.8.33.13"
+        data_source: "payroll_tip_accumulator"
+      - action: "prepare_t2"
+        schedules: ["S1", "S8", "S50", "S100", "S125", "S200"]
+      - action: "prepare_co17"
+        attachments: ["CO-1029.8.33.13"]
+      - action: "partner_review"
+        required: true
+      - action: "client_authorization"
+        required: true
+      - action: "efile_t2"
+        target: "cra"
+      - action: "efile_co17"
+        target: "revenu_quebec"
+
+# --- Alert Configuration ---
+alerts:
+  channels:
+    - type: "email"
+      recipients: ["bookkeeper@giwa.ca", "cpa@firm.ca"]
+    - type: "slack"
+      channel: "#giwa-finance"
+
+  rules:
+    - event: "srm_variance_detected"
+      threshold: 0.005
+      severity: "warning"
+      notify: ["bookkeeper", "cpa"]
+    - event: "gst_qst_filing_due"
+      days_before: [30, 14, 7, 3, 1]
+      severity: "info"
+      notify: ["cpa", "partner"]
+    - event: "source_deduction_remittance_due"
+      days_before: [7, 3, 1]
+      severity: "critical"
+      notify: ["bookkeeper", "cpa"]
+    - event: "t2_co17_filing_due"
+      days_before: [90, 60, 30, 14, 7]
+      severity: "info"
+      notify: ["cpa", "partner"]
+    - event: "dext_invoice_held"
+      severity: "warning"
+      notify: ["bookkeeper"]
+    - event: "tip_attribution_triggered"
+      severity: "info"
+      notify: ["bookkeeper", "cpa"]
